@@ -1,0 +1,7 @@
+﻿  error.cpp
+  lexer.cpp
+  main.cpp
+  token.cpp
+  正在生成代码...
+e:\软四相关\大三上学期\解释器\lexer\cmmcomplier\error.h(20): warning C4715: “errorStr”: 不是所有的控件路径都返回值
+  CMMComplier.vcxproj -> E:\软四相关\大三上学期\解释器\Lexer\x64\Debug\CMMComplier.exe
