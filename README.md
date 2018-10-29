@@ -25,3 +25,28 @@ f)如果输入串存在词法分析错误，则报错。<br>
 |<=|33|>=|34|id|35|
 |return|36|int_value|37|real_value|38|
 |char_value|39|str_value|40|||
+
+## 语法分析
+### 文法
+program -> stmt-sequence <br>
+stmt-sequence -> statement ; stmt-sequence | statement | ε <br>
+statement -> if-stmt | while-stmt |  read-stmt | write-stmt | for-stmt |declare-stmt | funcall-stmt | assign-stmt | return<br>
+stmt-block -> statement | { stmt-sequence } <br>
+if-stmt -> if ( exp ) then stmt-block | if ( exp ) then stmt-block else stmt-block <br>
+while-stmt -> while ( exp ) stmt-block <br>
+for-stmt -> for ( assign-stmt ; exp ; assign-stmt ) stmt-block<br>
+assign-stmt -> variable = exp ; <br>
+read-stmt -> read ( variable ); <br>
+write-stmt -> write ( exp ); <br>
+declare-stmt -> (int | real) ( (identifier [= exp ]) | (identifier [ exp ]) ) ; | (int | real ) functionDeclare-stmt stmt-block<br>
+functionDeclare-stmt ->  identifier ( declare-stmt ) <br>
+funcall-stmt -> identifier ( exp ) ;<br>
+variable -> identifier [ [ exp ] ] <br>
+exp -> addtive-exp logical-op addtive-exp | addtive-exp<br>
+addtive-exp -> term add-op additive-exp | term <br>
+term -> factor mul-op term | factor <br>
+factor -> ( exp ) | number | variable | Add-op exp <br>
+logical-op -> > | < | >= | <= | <> | == <br>
+add-op -> + | - <br>
+mul-op -> * | / <br>
+return -> return exp ;<br>
