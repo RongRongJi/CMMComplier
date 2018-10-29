@@ -33,6 +33,7 @@ public:
 		NEQ,// <>
 		LPS,// (
 		RPS,// )
+		COMMA, // ,
 		SEMI,// ;
 		LBRACE,//{
 		RBRACE,// }
@@ -52,8 +53,11 @@ public:
 		INT_VALUE,
 		REAL_VALUE,
 		CHAR_VALUE,
-		STR_VALUE
+		STR_VALUE,
 
+		LOGIC_EXP,
+		ADDTIVE_EXP,
+		TERM_EXP
 	};
 	token();
 	token(int type, int lineNo, int columnNo, string value = "");

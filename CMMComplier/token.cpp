@@ -54,6 +54,7 @@ string token::toString() {
 	case NEQ:
 	case LPS:
 	case RPS:
+	case COMMA:
 	case SEMI:
 	case LBRACE:
 	case RBRACE:
@@ -139,6 +140,7 @@ string token::typeToString(int type) {
 	case NEQ: return "<>";
 	case LPS: return "(";
 	case RPS: return ")";
+	case COMMA:return ",";
 	case SEMI: return ";";
 	case LBRACE: return "{";
 	case RBRACE: return "}";

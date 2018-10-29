@@ -118,13 +118,19 @@
   <ItemGroup>
     <ClInclude Include="error.h" />
     <ClInclude Include="lexer.h" />
+    <ClInclude Include="parseexception.h" />
+    <ClInclude Include="parser.h" />
     <ClInclude Include="token.h" />
+    <ClInclude Include="treeNode.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="error.cpp" />
     <ClCompile Include="lexer.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="parseexception.cpp" />
+    <ClCompile Include="parser.cpp" />
     <ClCompile Include="token.cpp" />
+    <ClCompile Include="treeNode.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
