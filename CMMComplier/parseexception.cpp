@@ -19,9 +19,9 @@ string parseexception::message()
 {
 	stringstream tokenStream;
 	if (m_errNo == -1)
-		tokenStream << "line " << m_token.lineNoValue() << ": \"" << m_token.value() << "\", expected \"" << m_tokenType << "\"";
+		tokenStream << "语法错误: 行 " << m_token.lineNoValue() <<" 列 "<<m_token.columnNoValue() << ": " << m_token.value() << ", 缺少 " << m_tokenType << "";
 	else
-		tokenStream << "line " << m_token.lineNoValue() << ": \"" << m_token.value() << "\", expected \"" << token::typeToString(m_errNo) << "\"";
+		tokenStream << "语法错误: 行 " << m_token.lineNoValue() << " 列 " << m_token.columnNoValue() <<  ": " << m_token.value() << ", 缺少 " << token::typeToString(m_errNo) << "";
 	return tokenStream.str();
 }
 

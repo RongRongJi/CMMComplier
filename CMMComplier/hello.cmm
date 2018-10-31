@@ -1,3 +1,15 @@
-int a_b = 3;
-int 1abc = 5;
-int a?bc = 4;
+int max(int a,int b){
+	if(a>b)
+		return a;
+	else
+		return b;
+}
+void main(){
+	int a;
+	int b;
+	int i;
+	int result;
+	read(a);
+	read(b);
+	write(result);
+}

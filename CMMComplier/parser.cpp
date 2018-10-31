@@ -17,7 +17,9 @@ vector<treeNode*> parser::SyntacticAnalyse(vector<token> tokenVec)
 		}
 	}
 	catch (parseexception & pe) {
-		pe.addToErrorMap();
+		errorStr = pe.message();
+		//pe.addToErrorMap();
+		cout << errorStr << endl;
 		if (m_errorNode != NULL)
 			delete m_errorNode;
 	}
@@ -67,8 +69,7 @@ treeNode * parser::parseStmt()
 		case token::RETURN:
 			return parseReturn();
 		default:
-			break;
-			//throw parseexception("statement", token(GetNextTokenType(), GetNextTokenLineNo()));
+			throw parseexception("statement", token(GetNextTokenType(), GetNextTokenColumnNo(), GetNextTokenLineNo()));
 	}
 }
 
@@ -347,8 +348,7 @@ treeNode * parser::pareseLiteral()
 		ConsumeNextToken(token::DOUQS);
 		break;
 	default:
-		break;
-		//throw("literals", token(GetNextTokenType(), GetNextTokenLineNo()));
+		throw("literals", token(GetNextTokenType(), GetNextTokenColumnNo(), GetNextTokenLineNo()));
 	}
 	return node;
 }
@@ -477,21 +477,18 @@ treeNode * parser::parseReturn()
 
 void parser::ConsumeNextToken(int type)
 {
+	if (index >= m_tokenVec.size())
+		throw parseexception(type, token(token::NULLL, m_currentToken.lineNoValue(), m_currentToken.columnNoValue()));
+
 	if (GetNextTokenType() == type) {
+		m_currentToken = m_tokenVec[index];
 		index++;
 		return;
 	}
 	throw parseexception(type, m_currentToken);
 }
 
-void parser::ConsumeNextToken(int types[], int size, string typeStr, int level)
-{
-}
 
-bool parser::CheckNextTokenType(int types[], int size)
-{
-	return false;
-}
 
 int parser::GetNextTokenType()
 {
@@ -555,7 +552,9 @@ int parser::GetNextTokenLineNo()
 		return m_currentToken.lineNoValue();
 }
 
-void parser::InsertQueueVec(string value, int childNum, int level)
-{
+int parser::GetNextTokenColumnNo() {
+	if (index < m_tokenVec.size())
+		return m_tokenVec[index].columnNoValue();
+	else
+		return m_currentToken.columnNoValue();
 }
-

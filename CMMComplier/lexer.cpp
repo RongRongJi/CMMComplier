@@ -122,6 +122,9 @@ bool lexer::isSingle() {
 	case ';':
 		m_tokenVec.push_back(token(token::SEMI, m_lineNo, m_columnNo, ";"));
 		return true;
+	case ',':
+		m_tokenVec.push_back(token(token::COMMA, m_lineNo, m_columnNo,  ","));
+		return true;
 	case '(':
 		m_tokenVec.push_back(token(token::LPS, m_lineNo, m_columnNo, "("));
 		return true;

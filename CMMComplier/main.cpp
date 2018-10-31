@@ -41,9 +41,13 @@ int Parser() {
 		total += temp + "\n";
 	}
 	vector<token> tokenVec = lex->LexAnalyze(total);
+	cout << "词法分析" << endl;
+	for (int i = 0; i < tokenVec.size(); i++) {
+		cout << tokenVec[i].toString() << endl;
+	}
 	string errorStr;
 	vector<treeNode*> treeNodeVec = parse->SyntacticAnalyse(tokenVec);
-	token t;
+	cout << "语法分析" << endl;
 	for (int i = 0; i < treeNodeVec.size(); i++) {
 		treeNode::travelTree(treeNodeVec[i], 1);
 		cout << endl;

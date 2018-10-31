@@ -22,6 +22,7 @@ public:
 
 private:
 	int index;
+	string errorStr;
 	vector<treeNode*> m_treeNodeVec;
 	vector<token> m_tokenVec;
 	treeNode* m_errorNode;
@@ -53,11 +54,9 @@ private:
 
 
 	void ConsumeNextToken(int type);
-	void ConsumeNextToken(int types[], int size, string typeStr, int level);
-	bool CheckNextTokenType(int types[], int size);
 	int GetNextTokenType();
 	int GetNextNextTokenType();
 	int GetNextTokenLineNo();
-	void InsertQueueVec(string value, int childNum, int level);
+	int GetNextTokenColumnNo();
 };
 

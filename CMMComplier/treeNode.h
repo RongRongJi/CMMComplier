@@ -27,7 +27,6 @@ public:
 		OP,             //运算符
 		FACTOR,         //因子
 		LITERAL,        //字面值
-		REG             //寄存器
 	};
 	treeNode(int type);
 	~treeNode();
