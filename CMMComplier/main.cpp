@@ -32,7 +32,6 @@ int Parser() {
 	lexer* lex = new lexer();
 	parser* parse = new parser();
 	ifstream myfile("hello.cmm");
-	//ofstream outfile("hello.par");
 	string temp, total = "";
 	if (!myfile.is_open()) {
 		cout << "未成功打开文件" << endl;
@@ -41,10 +40,10 @@ int Parser() {
 		total += temp + "\n";
 	}
 	vector<token> tokenVec = lex->LexAnalyze(total);
-	cout << "词法分析" << endl;
+	/*cout << "词法分析" << endl;
 	for (int i = 0; i < tokenVec.size(); i++) {
 		cout << tokenVec[i].toString() << endl;
-	}
+	}*/
 	string errorStr;
 	vector<treeNode*> treeNodeVec = parse->SyntacticAnalyse(tokenVec);
 	cout << "语法分析" << endl;

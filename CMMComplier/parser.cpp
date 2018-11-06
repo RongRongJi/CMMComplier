@@ -1,7 +1,9 @@
 #include "parser.h"
 #include <queue>
 
-
+//语法分析入口
+//parameter: 该文段所有的词法分析结果
+//return: 语法分析树
 vector<treeNode*> parser::SyntacticAnalyse(vector<token> tokenVec)
 {
 	index = 0;
@@ -36,7 +38,7 @@ parser::~parser()
 }
 
 
-
+//分析段落
 treeNode * parser::parseStmt()
 {
 	switch(GetNextTokenType()) {
@@ -77,7 +79,7 @@ treeNode * parser::parseStmt()
 * if语句
 * left存放exp表达式
 * middle存放if条件正确时的TreeNode
-* right存放else的TreeNode，如果有的话
+* right存放else的TreeNode
 */
 treeNode * parser::parseIfStmt()
 {
@@ -109,6 +111,13 @@ treeNode * parser::parseWhileStmt()
 	return node;
 }
 
+/**
+* for语句
+* left存放变量赋值语句
+* middle存放判断语句
+* right存放变量赋值语句
+* middle结点的next结点存放for语句的函数体
+*/
 treeNode * parser::parseForStmt()
 {
 	treeNode * node = new treeNode(treeNode::FOR_STMT);
@@ -126,6 +135,7 @@ treeNode * parser::parseForStmt()
 }
 
 /**
+* read语句
 * left存储一个VAR
 */
 treeNode * parser::parseReadStmt()
@@ -140,6 +150,7 @@ treeNode * parser::parseReadStmt()
 }
 
 /**
+* write语句
 * left存储一个EXP
 */
 treeNode * parser::parseWriteStmt()
@@ -204,6 +215,10 @@ treeNode * parser::parseAssignStmt(bool IsInsideFunction)
 	return node;
 }
 
+/**
+* 函数体
+* next存放函数中的下一句
+*/
 treeNode * parser::parseStmtBlock()
 {
 	treeNode * node = new treeNode(treeNode::STMT_BLOCK);
@@ -219,7 +234,12 @@ treeNode * parser::parseStmtBlock()
 	return node;
 }
 
-
+/**
+* 表达式
+* left存放多项式
+* middle存放逻辑运算符
+* right存放多项式
+*/
 treeNode * parser::parseExp()
 {
 	treeNode * node = new treeNode(treeNode::EXP);
@@ -238,10 +258,10 @@ treeNode * parser::parseExp()
 }
 
 /**
-* 复合表达式
-* 复合表达式则形如left middle right
-* 此时datatype为可能为  LOGIC_EXP ADDTIVE_EXP TERM_EXP
-* value==null
+* 多项式
+* left存放项
+* middle存放加减运算符
+* right存放多项式
 */
 treeNode * parser::parsePolynomial()
 {
@@ -257,6 +277,12 @@ treeNode * parser::parsePolynomial()
 	return leftNode;
 }
 
+/**
+* 项
+* left存放因子
+* middle存放乘除运算符
+* right存放项
+*/
 treeNode * parser::parseTerm()
 {
 	treeNode * node = new treeNode(treeNode::TERM);
@@ -273,12 +299,10 @@ treeNode * parser::parseTerm()
 
 /**
 * 因子
-* 有符号datatype存储TOKEN.PLUS/MINUS,默认为Token.PLUS
-* 只会在left中存放一个TreeNode
+* left存放一个TreeNode
 * 如果那个TreeNode是var,代表一个变量/数组元素
 * 如果这个TreeNode是exp,则是一个表达式因子
 * 如果是LITREAL,该LITREAL的value中存放字面值的字符形式
-* EXP为因子时,mDataType存储符号PLUS/MINUS
 */
 treeNode * parser::parseFactor()
 {
@@ -353,6 +377,9 @@ treeNode * parser::pareseLiteral()
 	return node;
 }
 
+/**
+* 逻辑运算符
+*/
 treeNode * parser::parseLogicOp()
 {
 	treeNode * node = new treeNode(treeNode::OP);
@@ -369,6 +396,9 @@ treeNode * parser::parseLogicOp()
 	return node;
 }
 
+/**
+* 加减运算符
+*/
 treeNode * parser::parseAddMinOp()
 {
 	treeNode * node = new treeNode(treeNode::OP);
@@ -381,6 +411,9 @@ treeNode * parser::parseAddMinOp()
 	return node;
 }
 
+/**
+* 乘除运算符
+*/
 treeNode * parser::parseMutDivOp()
 {
 	treeNode * node = new treeNode(treeNode::OP);
@@ -415,6 +448,11 @@ treeNode * parser::parseVariableName()
 	return node;
 }
 
+/**
+* 函数声明
+* left存放第一个参数
+* left的子节点中存放着接下来的参数
+*/
 treeNode * parser::parseFunctionDeclare()
 {
 	treeNode * node = new treeNode(treeNode::FUNDECLARE);
@@ -437,6 +475,11 @@ treeNode * parser::parseFunctionDeclare()
 	return node;
 }
 
+/**
+* 函数调用
+* left存放第一个参数表达式
+* left的子节点中存放接下来的参数表达式
+*/
 treeNode * parser::pareseFunctionCall()
 {
 	treeNode * node = new treeNode(treeNode::FUNCALL);
@@ -465,6 +508,10 @@ treeNode * parser::parseVariableType()
 	return nullptr;
 }
 
+/**
+* return语句
+* left存放表达式
+*/
 treeNode * parser::parseReturn()
 {
 	treeNode * node = new treeNode(treeNode::RETURN_STMT);
@@ -475,6 +522,7 @@ treeNode * parser::parseReturn()
 	return node;
 }
 
+//消耗下一个token
 void parser::ConsumeNextToken(int type)
 {
 	if (index >= m_tokenVec.size())
@@ -489,7 +537,7 @@ void parser::ConsumeNextToken(int type)
 }
 
 
-
+//获得token类型
 int parser::GetNextTokenType()
 {
 	if (index < m_tokenVec.size()) {
@@ -517,6 +565,7 @@ int parser::GetNextTokenType()
 	return token::NULLL;
 }
 
+//获得下下一个token类型
 int parser::GetNextNextTokenType()
 {
 	if (index + 1 < m_tokenVec.size()) {
@@ -544,6 +593,7 @@ int parser::GetNextNextTokenType()
 	return token::NULLL;
 }
 
+//获得token行号
 int parser::GetNextTokenLineNo()
 {
 	if (index < m_tokenVec.size())
@@ -552,6 +602,7 @@ int parser::GetNextTokenLineNo()
 		return m_currentToken.lineNoValue();
 }
 
+//获得token列号
 int parser::GetNextTokenColumnNo() {
 	if (index < m_tokenVec.size())
 		return m_tokenVec[index].columnNoValue();
