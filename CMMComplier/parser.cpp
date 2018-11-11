@@ -4,7 +4,7 @@
 //语法分析入口
 //parameter: 该文段所有的词法分析结果
 //return: 语法分析树
-vector<treeNode*> parser::SyntacticAnalyse(vector<token> tokenVec)
+vector<treeNode*> parser::SyntacticAnalyse(vector<token> tokenVec, bool & isError)
 {
 	index = 0;
 	m_tokenVec = tokenVec;
@@ -19,8 +19,8 @@ vector<treeNode*> parser::SyntacticAnalyse(vector<token> tokenVec)
 		}
 	}
 	catch (parseexception & pe) {
+		isError = true;
 		errorStr = pe.message();
-		//pe.addToErrorMap();
 		cout << errorStr << endl;
 		if (m_errorNode != NULL)
 			delete m_errorNode;

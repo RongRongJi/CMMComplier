@@ -60,7 +60,7 @@ public:
 private:
 	int m_type;
 	int m_lineNo;
-	std::vector<treeNode *> m_childVec;
+	vector<treeNode *> m_childVec;
 	treeNode * m_left;
 	treeNode * m_middle;
 	treeNode * m_right;

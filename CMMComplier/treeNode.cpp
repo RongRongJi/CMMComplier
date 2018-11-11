@@ -148,7 +148,8 @@ string treeNode::toString() {
 	case FUNCALL:
 		return "FUNCALL";
 	case OP:
-		return "OP";
+		return token::typeToString(this->getDataType());
+		//return "OP";
 	case FACTOR:
 		return "FACTOR";
 	case LITERAL:
@@ -158,12 +159,6 @@ string treeNode::toString() {
 }
 
  void treeNode::travelTree(treeNode * node,int blk) {
-	/*if (node->getLeft()) travelTree(node->getLeft(),blk+1);
-	if (node->getMiddle()) travelTree(node->getMiddle(),blk+1);
-	if (node->getRight()) travelTree(node->getRight(),blk+1);
-	if (node->getNext()) travelTree(node->getNext(),blk+1);
-	for (int i = 0; i < blk; i++) cout << "--";
-	cout  << node->toString() << " "<<endl;*/
 	 cout << node->toString() << " " << endl;
 	 if (node->getLeft()) {
 		 for (int i = 0; i < blk; i++) cout << "--";

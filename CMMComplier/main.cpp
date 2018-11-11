@@ -45,11 +45,14 @@ int Parser() {
 		cout << tokenVec[i].toString() << endl;
 	}*/
 	string errorStr;
-	vector<treeNode*> treeNodeVec = parse->SyntacticAnalyse(tokenVec);
-	cout << "语法分析" << endl;
-	for (int i = 0; i < treeNodeVec.size(); i++) {
-		treeNode::travelTree(treeNodeVec[i], 1);
-		cout << endl;
+	bool isError = false;
+	vector<treeNode*> treeNodeVec = parse->SyntacticAnalyse(tokenVec,isError);
+	if (!isError) {
+		cout << "语法分析" << endl;
+		for (int i = 0; i < treeNodeVec.size(); i++) {
+			treeNode::travelTree(treeNodeVec[i], 1);
+			cout << endl;
+		}
 	}
 	system("pause");
 	return 0;

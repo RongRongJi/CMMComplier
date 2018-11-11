@@ -15,7 +15,7 @@ class parser
 {
 public:
 	//ÎÄ·¨·ÖÎö
-	vector<treeNode*> SyntacticAnalyse(vector<token> tokenVec);
+	vector<treeNode*> SyntacticAnalyse(vector<token> tokenVec, bool & isError);
 	parser();
 	~parser();
 
