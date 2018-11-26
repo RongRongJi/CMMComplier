@@ -1,5 +1,6 @@
 #include "parser.h"
 #include <queue>
+#include "common.h"
 
 //语法分析入口
 //parameter: 该文段所有的词法分析结果
@@ -25,6 +26,7 @@ vector<treeNode*> parser::SyntacticAnalyse(vector<token> tokenVec, bool & isErro
 		if (m_errorNode != NULL)
 			delete m_errorNode;
 	}
+	isError = false;
 	return m_treeNodeVec;
 }
 
@@ -65,7 +67,7 @@ treeNode * parser::parseStmt()
 			return parseStmtBlock();
 		case token::ID:
 			if (GetNextNextTokenType() == token::LPS)
-				return pareseFunctionCall();
+				return pareseFunctionCall(true);
 			else
 				return parseAssignStmt(false);
 		case token::RETURN:
@@ -85,6 +87,7 @@ treeNode * parser::parseIfStmt()
 {
 	treeNode * node = new treeNode(treeNode::IF_STMT);
 	ConsumeNextToken(token::IF);
+	node->setLineNo(m_currentToken.lineNoValue());
 	ConsumeNextToken(token::LPS);
 	node->setLeft(parseExp());
 	ConsumeNextToken(token::RPS);
@@ -104,6 +107,7 @@ treeNode * parser::parseWhileStmt()
 {
 	treeNode* node = new treeNode(treeNode::WHILE_STMT);
 	ConsumeNextToken(token::WHILE);
+	node->setLineNo(m_currentToken.lineNoValue());
 	ConsumeNextToken(token::LPS);
 	node->setLeft(parseExp());
 	ConsumeNextToken(token::RPS);
@@ -130,7 +134,7 @@ treeNode * parser::parseForStmt()
 	ConsumeNextToken(token::SEMI);
 	node->setRight(parseAssignStmt(true));
 	ConsumeNextToken(token::RPS);
-	node->getMiddle()->setNext(parseStmtBlock());
+	node->getMiddle()->setNext(parseStmt());
 	return node;
 }
 
@@ -142,6 +146,7 @@ treeNode * parser::parseReadStmt()
 {
 	treeNode* node = new treeNode(treeNode::READ_STMT);
 	ConsumeNextToken(token::READ);
+	node->setLineNo(m_currentToken.lineNoValue());
 	ConsumeNextToken(token::LPS);
 	node->setLeft(parseVariableName());
 	ConsumeNextToken(token::RPS);
@@ -157,6 +162,7 @@ treeNode * parser::parseWriteStmt()
 {
 	treeNode* node = new treeNode(treeNode::WRITE_STMT);
 	ConsumeNextToken(token::WRITE);
+	node->setLineNo(m_currentToken.lineNoValue());
 	ConsumeNextToken(token::LPS);
 	node->setLeft(parseExp());
 	ConsumeNextToken(token::RPS);
@@ -180,20 +186,33 @@ treeNode * parser::parseDeclareStmt(bool IsInsideFunction)
 			break;
 		}
 	}
+	node->setLineNo(m_currentToken.lineNoValue());
+	int dataType = m_currentToken.typeValue();
 	if (GetNextNextTokenType() == token::LPS) //函数声明
 	{
-		node->setLeft(parseFunctionDeclare());
+		treeNode * funNode = parseFunctionDeclare();
+		funNode->setDataType(dataType);
+		node->setLeft(funNode);
 		node->setMiddle(parseStmtBlock());
 	}
 	else //变量声明
 	{
-		node->setLeft(parseVariableName());
-		if (GetNextTokenType() == token::ASSIGN)//
+		treeNode * varNode = parseVariableName();
+		node->setLeft(varNode);
+
+		varNode->setDataType(dataType);
+		if (IsInsideFunction) {
+			treeNode* regNode = new treeNode(treeNode::REG);
+			regNode->setValue("@ebp-" + itos(m_paraIndex));
+			node->setMiddle(regNode);
+		}
+		else if (GetNextTokenType() == token::ASSIGN)//
 		{
 			ConsumeNextToken(token::ASSIGN);
 			node->setMiddle(parseExp());
 		}
-		if(!IsInsideFunction)
+
+		if (!IsInsideFunction)
 			ConsumeNextToken(token::SEMI);
 	}
 	return node;
@@ -208,6 +227,7 @@ treeNode * parser::parseAssignStmt(bool IsInsideFunction)
 {
 	treeNode * node = new treeNode(treeNode::ASSIGN_STMT);
 	node->setLeft(parseVariableName());
+	node->setLineNo(m_currentToken.lineNoValue());
 	ConsumeNextToken(token::ASSIGN);
 	node->setMiddle(parseExp());
 	if (!IsInsideFunction)
@@ -330,7 +350,7 @@ treeNode * parser::parseFactor()
 		break;
 	default:
 		if (GetNextNextTokenType() == token::LPS)
-			node->setLeft(parseFunctionDeclare());
+			node->setLeft(pareseFunctionCall(false));
 		else
 			node->setLeft(parseVariableName());
 		break;
@@ -462,10 +482,12 @@ treeNode * parser::parseFunctionDeclare()
 	ConsumeNextToken(token::LPS);
 	treeNode * header, *temp;
 	if (GetNextTokenType() == token::INT || GetNextTokenType() == token::REAL || GetNextTokenType() == token::CHAR) {
+		m_paraIndex = 1;
 		header = parseDeclareStmt(true);
 		node->setLeft(header);
 		while (GetNextTokenType() != token::RPS) {
 			ConsumeNextToken(token::COMMA);
+			m_paraIndex++;
 			temp = parseDeclareStmt(true);
 			header->setNext(temp);
 			header = temp;
@@ -480,7 +502,7 @@ treeNode * parser::parseFunctionDeclare()
 * left存放第一个参数表达式
 * left的子节点中存放接下来的参数表达式
 */
-treeNode * parser::pareseFunctionCall()
+treeNode * parser::pareseFunctionCall(bool isStmt)
 {
 	treeNode * node = new treeNode(treeNode::FUNCALL);
 	ConsumeNextToken(token::ID);
@@ -499,7 +521,8 @@ treeNode * parser::pareseFunctionCall()
 		}
 	}
 	ConsumeNextToken(token::RPS);
-	ConsumeNextToken(token::SEMI);
+	if(isStmt)
+		ConsumeNextToken(token::SEMI);
 	return node;
 }
 

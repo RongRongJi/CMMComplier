@@ -6,14 +6,10 @@ int max(int a,int b){
 }
 void main(){
 	int a = 2;
-	while(a+3){
-		if(a==2)
-			a=5;
-	}
 	int b;
 	int i;
 	int result;
 	read(a);
 	read(b);
-	write(result);
+	write(a);
 }

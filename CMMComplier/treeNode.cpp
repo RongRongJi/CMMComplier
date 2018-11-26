@@ -154,6 +154,8 @@ string treeNode::toString() {
 		return "FACTOR";
 	case LITERAL:
 		return "LITERAL";
+	case REG:
+		return "REG";
 	}
 	return nullptr;
 }

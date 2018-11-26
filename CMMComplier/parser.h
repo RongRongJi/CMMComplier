@@ -28,7 +28,7 @@ private:
 	treeNode* m_errorNode;
 	token m_currentToken;
 	vector<queue<treeNodeString> > m_queueVec;
-	//int m_paraIndex;
+	int m_paraIndex;
 
 	treeNode* parseStmt();								//段落
 	treeNode* parseIfStmt();							//if语句
@@ -49,7 +49,7 @@ private:
 	treeNode* parseMutDivOp();							//* /
 	treeNode* parseVariableName();						//变量名
 	treeNode* parseFunctionDeclare();					//函数声明
-	treeNode* pareseFunctionCall();						//函数调用
+	treeNode* pareseFunctionCall(bool isStmt);			//函数调用
 	treeNode* parseVariableType();						//变量类型
 	treeNode* parseReturn();							//return语句
 
