@@ -35,13 +35,13 @@ public:
 	void setValueIndex(int valueIndex);
 	
 private:
-	string m_name;
-	int m_lineNo;
-	int m_type;
-	int m_dataSize;
-	int m_level;
-	int m_elementNum;
-	int m_valueIndex;
+	string m_name;			//符号名
+	int m_lineNo;			//行号
+	int m_type;				//符号类型
+	int m_dataSize;			//符号所占空间
+	int m_level;			//符号所在层数
+	int m_elementNum;		//元素数量
+	int m_valueIndex;		//当前指数
 
 };
 

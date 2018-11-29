@@ -17,7 +17,7 @@ public:
 	void deregisterSymbol(int level);
 
 	string getNewTempSymbolName();
-	symbol getSymbol(string  name, int  index, int  dereference);
+	symbol getSymbol(string  name);
 	int getSymbolType(string  name);
 	int getCurFunSymbolType();
 	funsymbol getFunSymbol(string  name, int lineNo);
@@ -32,10 +32,10 @@ public:
 	void setFunSymbolVec(vector<funsymbol> &funSymbolVec);
 
 private:
-	static const string TEMP_PREFIX;
+	static const string TEMP_PREFIX;		//临时变量前缀
 
-	vector<symbol> m_symbolVec;
-	vector<funsymbol> m_funSymbolVec;
-	vector<symbol> m_tempSymbolVec;
+	vector<symbol> m_symbolVec;				//符号表集
+	vector<funsymbol> m_funSymbolVec;		//函数符号表集
+	vector<symbol> m_tempSymbolVec;			//临时变量表集
 };
 

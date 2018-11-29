@@ -12,6 +12,7 @@ execute::~execute()
 {
 }
 
+
 bool execute::init(vector<quarterExp> qeVec)
 {
 	codegenerater * cg = new codegenerater();
@@ -23,7 +24,6 @@ bool execute::init(vector<quarterExp> qeVec)
 	while (!m_previousEsp.empty())
 		m_previousEsp.pop();
 	m_level = 0;
-	m_waitInput = false;
 	m_valueVec.clear();
 	m_valueVec.push_back(value("$" + itos(0x00000000), value::ADDR));
 	m_addrMap.clear();
@@ -38,8 +38,6 @@ bool execute::init(vector<quarterExp> qeVec)
 	m_globalVec.clear();
 	m_globalMap.clear();
 	m_isOver = false;
-	m_isRunFinished = 0;
-	m_isExceptionHappened = 0;
 	try {
 		if (m_nextQeVecIndex < 0)
 			throw executeException(-1, "无法找到main函数入口");
@@ -56,6 +54,29 @@ bool execute::init(vector<quarterExp> qeVec)
 	return true;
 }
 
+/*
+四元式执行：
+JMP:
+第二元进行判断，如果非0则执行JMP，跳转到第四元所指向的四元式
+READ:
+根据第四元的变量类型，声明该类型的变量，并调用cin输入值
+WRITE:
+根据第四元的变量的值存入returnValue，调用cout输出returnValue
+IN:
+将旧栈顶存入栈集中，增加层数
+OUT:
+减少层数，撤销该层的所有符号表，将旧栈顶弹出
+INT/REAL/CHAR/VOID:
+通过符号表查询所需的变量长度，申请空间
+ASSIGN:
+将第二元的值赋值给第四元的变量
+PLUS/MINUS/MUL/DIV/GT/GET/LT/LET/EQ/NEQ:
+将第二元第三元的值进行第一元所指的运算操作，并把结果保存在第四元的临时变量中
+CALL:
+将旧栈底存入栈集中，新的栈底为栈顶-1
+CALLFH:
+新栈顶为原栈底，新栈底从栈集中弹出
+*/
 void execute::runSingleStmt()
 {
 	quarterExp qExp = m_qeVec[m_nextQeVecIndex];
@@ -78,32 +99,25 @@ void execute::runSingleStmt()
 		}
 	}
 	else if (type == quarterExp::READ) {
-		int index = getScript(qExp.fourth());
-		int redeference = 0;
-		symbol tempSymbol = m_symbolTable.getSymbol(qExp.fourth(), index, redeference);
+		symbol tempSymbol = m_symbolTable.getSymbol(qExp.fourth());
 		string tempValue;
 		cin >> tempValue;
 		inputToStream(tempValue);
-		/*m_waitInput = true;
-		while (m_waitInput) {
-			if (m_isOver)
-				return;
-		}*/
 		switch (tempSymbol.type()) {
 		case symbol::SINGLE_INT:
 			int intTemp;
 			m_inputStream >> intTemp;
-			assignProcess(tempSymbol, index, redeference, itos(intTemp));
+			assignProcess(tempSymbol, itos(intTemp));
 			break;
 		case symbol::SINGLE_REAL:
 			double doubleTemp;
 			m_inputStream >> doubleTemp;
-			assignProcess(tempSymbol, index, redeference, dtos(doubleTemp));
+			assignProcess(tempSymbol, dtos(doubleTemp));
 			break;
 		case symbol::SINGLE_CHAR:
 			char charTemp;
 			m_inputStream >> charTemp;
-			assignProcess(tempSymbol, index, redeference, "'" + ctos(charTemp) + "'");
+			assignProcess(tempSymbol, "'" + ctos(charTemp) + "'");
 			break;
 		default:
 			break;
@@ -180,111 +194,88 @@ void execute::runSingleStmt()
 		declareProcess(qExp, quarterExp::VOID);
 	}
 	else if (type == quarterExp::ASSIGN) {
-		int index = getScript(qExp.fourth());
-		int dereference = 0;
 		symbol tempSymbol;
 		if (qExp.fourth()[0] == '@') {
 			tempSymbol = symbol(getRegNum(qExp.fourth()));
-			//tempSymbol = symbol(-1);
 		}
 		else {
-			tempSymbol = m_symbolTable.getSymbol(qExp.fourth(), index, dereference);
+			tempSymbol = m_symbolTable.getSymbol(qExp.fourth());
 		}
-		assignProcess(tempSymbol, index, dereference, qExp.second());
+		assignProcess(tempSymbol, qExp.second());
 	}
 	else if (type == quarterExp::PLUS) {
-		int index = getScript(qExp.fourth());
-		int dereference = 0;
-		symbol tempSymbol = m_symbolTable.getSymbol(qExp.fourth(), index, dereference);
+		symbol tempSymbol = m_symbolTable.getSymbol(qExp.fourth());
 		value l_value = readValue(qExp.second());
 		value r_value = readValue(qExp.third());
 		string result = l_value + r_value;
-		assignProcess(tempSymbol, index, dereference, result);
+		assignProcess(tempSymbol, result);
 	}
 	else if (type == quarterExp::MINUS) {
-		int index = getScript(qExp.fourth());
-		int dereference = 0;
-		symbol tempSymbol = m_symbolTable.getSymbol(qExp.fourth(), index, dereference);
+		symbol tempSymbol = m_symbolTable.getSymbol(qExp.fourth());
 		if (qExp.second() == "")
 			qExp.setSecond("0");
 		value l_value = readValue(qExp.second());
 		value r_value = readValue(qExp.third());
 		string result = l_value - r_value;
-		assignProcess(tempSymbol, index, dereference, result);
+		assignProcess(tempSymbol,result);
 	}
 	else if (type == quarterExp::MUL) {
 		string result = "";
-		int index = getScript(qExp.fourth());
-		int dereference = 0;
-		symbol tempSymbol = m_symbolTable.getSymbol(qExp.fourth(), index, dereference);
+		symbol tempSymbol = m_symbolTable.getSymbol(qExp.fourth());
 		if (qExp.second() != "") {
 			value l_value = readValue(qExp.second());
 			value r_value = readValue(qExp.third());
 		}
-		assignProcess(tempSymbol, index, dereference, result);
+		assignProcess(tempSymbol,  result);
 	}
 	else if (type == quarterExp::DIV) {
-		int index = getScript(qExp.fourth());
-		int dereference = 0;
-		symbol tempSymbol = m_symbolTable.getSymbol(qExp.fourth(), index, dereference);
+		symbol tempSymbol = m_symbolTable.getSymbol(qExp.fourth());
 		value l_value = readValue(qExp.second());
 		value r_value = readValue(qExp.third());
 		string result = l_value / r_value;
-		assignProcess(tempSymbol, index, dereference, result);
+		assignProcess(tempSymbol, result);
 	}
 	else if (type == quarterExp::GT) {
-		int index = getScript(qExp.fourth());
-		int dereference = 0;
-		symbol tempSymbol = m_symbolTable.getSymbol(qExp.fourth(), index, dereference);
+		symbol tempSymbol = m_symbolTable.getSymbol(qExp.fourth());
 		value l_value = readValue(qExp.second());
 		value r_value = readValue(qExp.third());
 		string result = l_value > r_value;
-		assignProcess(tempSymbol, index, dereference, result);
+		assignProcess(tempSymbol,  result);
 	}
 	else if (type == quarterExp::GET) {
-		int index = getScript(qExp.fourth());
-		int dereference = 0;
-		symbol tempSymbol = m_symbolTable.getSymbol(qExp.fourth(), index, dereference);
+		symbol tempSymbol = m_symbolTable.getSymbol(qExp.fourth());
 		value l_value = readValue(qExp.second());
 		value r_value = readValue(qExp.third());
 		string result = l_value >= r_value;
-		assignProcess(tempSymbol, index, dereference, result);
+		assignProcess(tempSymbol,result);
 	}
 	else if (type == quarterExp::LT) {
-		int index = getScript(qExp.fourth());
-		int dereference = 0;
-		symbol tempSymbol = m_symbolTable.getSymbol(qExp.fourth(), index, dereference);
+		symbol tempSymbol = m_symbolTable.getSymbol(qExp.fourth());
 		value l_value = readValue(qExp.second());
 		value r_value = readValue(qExp.third());
 		string result = l_value < r_value;
-		assignProcess(tempSymbol, index, dereference, result);
+		assignProcess(tempSymbol, result);
 	}
 	else if (type == quarterExp::LET) {
-		int index = getScript(qExp.fourth());
-		int dereference = 0;
-		symbol tempSymbol = m_symbolTable.getSymbol(qExp.fourth(), index, dereference);
+		symbol tempSymbol = m_symbolTable.getSymbol(qExp.fourth());
 		value l_value = readValue(qExp.second());
 		value r_value = readValue(qExp.third());
 		string result = l_value <= r_value;
-		assignProcess(tempSymbol, index, dereference, result);
+		assignProcess(tempSymbol, result);
 	}
 	else if (type == quarterExp::EQ) {
-		int index = getScript(qExp.fourth());
-		int dereference = 0;
-		symbol tempSymbol = m_symbolTable.getSymbol(qExp.fourth(), index, dereference);
+		symbol tempSymbol = m_symbolTable.getSymbol(qExp.fourth());
 		value l_value = readValue(qExp.second());
 		value r_value = readValue(qExp.third());
 		string result = l_value == r_value;
-		assignProcess(tempSymbol, index, dereference, result);
+		assignProcess(tempSymbol, result);
 	}
 	else if (type == quarterExp::NEQ) {
-		int index = getScript(qExp.fourth());
-		int dereference = 0;
-		symbol tempSymbol = m_symbolTable.getSymbol(qExp.fourth(), index, dereference);
+		symbol tempSymbol = m_symbolTable.getSymbol(qExp.fourth());
 		value l_value = readValue(qExp.second());
 		value r_value = readValue(qExp.third());
 		string result = nequal(l_value, r_value);
-		assignProcess(tempSymbol, index, dereference, result);
+		assignProcess(tempSymbol, result);
 	}
 	else if (type == quarterExp::CALL) {
 		m_previousEbp.push(m_ebp);
@@ -305,17 +296,9 @@ void execute::inputToStream(string value)
 	m_inputStream.clear();
 	m_inputStream.str("");
 	m_inputStream << value;
-	//m_waitInput = false;
 }
 
-int execute::runMode()
-{
-	return 0;
-}
 
-void execute::setRunMode(int runMode)
-{
-}
 
 bool execute::isOver()
 {
@@ -327,33 +310,11 @@ void execute::setIsOver(bool isOver)
 	m_isOver = isOver;
 }
 
-int execute::isRunFinished()
-{
-	return m_isRunFinished;
-}
-
-void execute::setIsRunFinished(int isRunFinished)
-{
-	m_isRunFinished = isRunFinished;
-}
-
-int execute::isExceptionHappened()
-{
-	return m_isExceptionHappened;
-}
-
-void execute::setIsExceptionHappened(int isExceptionHappened)
-{
-	m_isExceptionHappened = isExceptionHappened;
-}
-
 void execute::run()
 {
 	m_isOver = false;
 	while (!m_isOver)
 		runSingleStmt();
-	if (m_nextQeVecIndex == -1)
-		m_isRunFinished = 1;
 }
 
 //根据string返回类型（0:int, 1:float, 2:variable, 3:temp)
@@ -373,6 +334,15 @@ int execute::getStringType(string str)
 	}
 }
 
+/*
+根据字符串读取值
+纯数字：REAL\ INT
+'开头为CHAR
+$开头为地址
+#开头为临时变量
+@开头为栈顶栈底
+"开头为STR
+*/
 value execute::readValue(string str)
 {
 	if (isdigit(str[0]) || str[0] == '-') {
@@ -408,9 +378,7 @@ value execute::readValue(string str)
 		return value("$" + itos(returnAddr), value::ADDR);
 	}
 	else {
-		int index = getScript(str);
-		int dereference = 0;
-		symbol tempSymbol = m_symbolTable.getSymbol(str, index, dereference);
+		symbol tempSymbol = m_symbolTable.getSymbol(str);
 		switch (tempSymbol.type()) {
 		case symbol::SINGLE_CHAR:
 		case symbol::SINGLE_INT:
@@ -425,39 +393,33 @@ value execute::readValue(string str)
 	}
 }
 
-void execute::assignProcess(symbol sym, int index, int dereference, string str)
+void execute::assignProcess(symbol sym, string str)
 {
 	value tempValue = readValue(str);
-	if (dereference == 1) {
-		int valueIndex = 0;
-		
-	}
-	else {
-		switch (sym.type()) {
-		case symbol::TEMP:
-			m_tempMap[sym.name()] = tempValue;
-			break;
-		case symbol::REG:
-			if (sym.valueIndex() == m_esp) {
-				m_valueVec.push_back(tempValue);
-				m_addrMap[m_esp] = m_curDataAddr - tempValue.size();
-				m_curDataAddr = m_addrMap[m_esp];
-				m_esp++;
-			}
-			m_valueVec.at(sym.valueIndex()) = tempValue;
-			break;
-		case symbol::SINGLE_INT:
-			assignUtil(sym.valueIndex(), 0, tempValue.valueStr(), value::INT_VALUE, sym.level() == 0);
-			break;
-		case symbol::SINGLE_REAL:
-			assignUtil(sym.valueIndex(), 0, tempValue.valueStr(), value::REAL_VALUE, sym.level() == 0);
-			break;
-		case symbol::SINGLE_CHAR:
-			assignUtil(sym.valueIndex(), 0, tempValue.valueStr(), value::CHAR_VALUE, sym.level() == 0);
-			break;
-		default:
-			break;
+	switch (sym.type()) {
+	case symbol::TEMP:
+		m_tempMap[sym.name()] = tempValue;
+		break;
+	case symbol::REG:
+		if (sym.valueIndex() == m_esp) {
+			m_valueVec.push_back(tempValue);
+			m_addrMap[m_esp] = m_curDataAddr - tempValue.size();
+			m_curDataAddr = m_addrMap[m_esp];
+			m_esp++;
 		}
+		m_valueVec.at(sym.valueIndex()) = tempValue;
+		break;
+	case symbol::SINGLE_INT:
+		assignUtil(sym.valueIndex(), 0, tempValue.valueStr(), value::INT_VALUE, sym.level() == 0);
+		break;
+	case symbol::SINGLE_REAL:
+		assignUtil(sym.valueIndex(), 0, tempValue.valueStr(), value::REAL_VALUE, sym.level() == 0);
+		break;
+	case symbol::SINGLE_CHAR:
+		assignUtil(sym.valueIndex(), 0, tempValue.valueStr(), value::CHAR_VALUE, sym.level() == 0);
+		break;
+	default:
+		break;
 	}
 }
 
@@ -505,7 +467,7 @@ void execute::declareProcess(quarterExp qExp, string type)
 				symbol sym(qExp.fourth(), symbolType, qExp.lineNo(), m_level, elementNum);
 				sym.setValueIndex(getRegNum(qExp.second()));
 				m_symbolTable.registerSymbol(sym);
-				assignProcess(sym, -1, 0, qExp.second());
+				assignProcess(sym,  qExp.second());
 			}
 			else {
 				symbol sym(qExp.fourth(), symbolType, qExp.lineNo(), m_level, elementNum);
@@ -526,7 +488,7 @@ void execute::declareProcess(quarterExp qExp, string type)
 					m_esp++;
 				}
 				if (qExp.second() != "")
-					assignProcess(sym, -1, 0, qExp.second());
+					assignProcess(sym,  qExp.second());
 			}
 		}
 	}
@@ -593,10 +555,6 @@ int execute::getValueIndex(string addrValue, int &addrRange, int &offset)
 	}
 }
 
-int execute::getScript(string varStr)
-{
-	return -1;
-}
 
 int execute::getRegNum(string str)
 {
@@ -616,22 +574,4 @@ int execute::getRegNum(string str)
 	return result;
 }
 
-string execute::addrFromStr(string addr)
-{
-	return string();
 
-}
-
-string execute::addrFromInt(int addr)
-{
-	return string();
-}
-
-void execute::setAddrUnitSize(int symbolType)
-{
-}
-
-void execute::setAddrUnitSize(string addrStr)
-{
-	
-}

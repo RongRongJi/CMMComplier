@@ -46,8 +46,8 @@ public:
 	friend std::string operator==( value  l_value,  value  r_value);
 
 private:
-	string m_valueStr;
-	int m_type;
-	int m_size;
+	string m_valueStr;		//数值
+	int m_type;				//数值类型
+	int m_size;				//数值大小
 };
 

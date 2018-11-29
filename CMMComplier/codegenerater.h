@@ -20,29 +20,21 @@ public:
 	int getEntry();
 
 private:
-	enum {
-		ALL,
-		VALUE,
-		CHAR
-	};
-	int m_level;
-	int m_curFunLevel;
-	int m_curStmtLineNo;
-	vector<quarterExp> m_qeVec;
-	symbolTable m_table;
-	
+
+	int m_level;					//层数
+	int m_curFunLevel;				//函数层
+	int m_curStmtLineNo;			//当前语句行数
+	vector<quarterExp> m_qeVec;		//四元式
+	symbolTable m_table;			//符号表
 
 
-	bool isTypeMatch;
-	int m_targetType;
+	stack<int> m_typeStack;			//类型栈
 
-	stack<int> m_typeStack;
+	vector<int> m_returnJmpIndexVec;//返回集
 
-	vector<int> m_returnJmpIndexVec;
+	void interpret(treeNode * node);				//总解释函数
 
-	void interpret(treeNode * node);
-
-	void interpretIfStmt( treeNode * node);
+	void interpretIfStmt( treeNode * node);			
 	void interpretWhileStmt( treeNode * node);
 	void interpretForStmt( treeNode * node);
 	void interpretReadStmt( treeNode * node);
@@ -58,8 +50,6 @@ private:
 	string interpretAddtiveExp( treeNode * node);
 	string interpretTermExp( treeNode * node);
 	string interpretVar( treeNode * node);
-	string interpretReference( treeNode * node);
-	string interpretScript( treeNode * node);
 
 	//解释declare语句辅助方法
 	void checkDeclareIsRight(int declarType);
@@ -79,12 +69,6 @@ private:
 
 	//判断字符串是否是常量
 	bool isConstant(string & str, int & type);
-
-	//判断数组下标是否合法
-	bool isSubscriptRight(string & script);
-
-	//判断赋值是否合法
-	bool isAssignRight(int varType, string & valueStr);
 
 	//将function类型转为Value类型
 	int transformFunToValue(int funType);

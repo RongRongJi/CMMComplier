@@ -82,6 +82,18 @@ void codegenerater::interpret(treeNode * node)
 	}
 }
 
+/*
+if语句四元式
+(JMP, 判断表达式, , )
+(IN, , , )
+(函数主体操作)
+(OUT, , ,)
+如果有else则进行下面操作
+(JMP, , ,) 
+(IN, , ,)
+(OUT, , ,)
+*/
+
 void codegenerater::interpretIfStmt(treeNode * node)
 {
 	m_qeVec.push_back(quarterExp(quarterExp::JMP, interpretExp(node->getLeft()), "", "", m_curStmtLineNo));
@@ -109,6 +121,14 @@ void codegenerater::interpretIfStmt(treeNode * node)
 	}
 }
 
+/*
+while语句四元式
+(JMP,判断表达式, ,)
+(IN, , ,)
+(函数主体操作)
+(OUT, , ,)
+(JMP, , ,返回函数主体)
+*/
 void codegenerater::interpretWhileStmt(treeNode * node)
 {
 	int jumpLine = quarterExp::index() + 1;
@@ -124,6 +144,14 @@ void codegenerater::interpretWhileStmt(treeNode * node)
 	m_qeVec[falseJmpIndex].setFourth(itos(quarterExp::index() + 1));
 }
 
+/*
+for语句四元式
+(JMP,判断表达式, , )
+(IN, , ,)
+(函数主体操作)
+(OUT, , ,)
+(JMP,函数主体行数, , )
+*/
 void codegenerater::interpretForStmt(treeNode * node)
 {
 	interpret(node->getLeft());
@@ -141,13 +169,14 @@ void codegenerater::interpretForStmt(treeNode * node)
 	m_qeVec[falseJmpIndex].setFourth(itos(quarterExp::index() + 1));
 }
 
+/*
+read语句四元式
+(READ, , ,存储变量)
+*/
 void codegenerater::interpretReadStmt(treeNode * node)
 {
 	int varType = m_table.checkSymbolIsDeclared(node->getLeft(), node->getLeft()->getLineNo());
 	string varStr = node->getLeft()->getValue();
-	if (node->getLeft()->getLeft() != NULL) {
-		varStr += ("[" + interpretScript(node->getLeft()->getLeft()) + "]");
-	}
 	switch (varType) {
 	case 1:
 	case -1:
@@ -158,6 +187,10 @@ void codegenerater::interpretReadStmt(treeNode * node)
 	m_qeVec.push_back(quarterExp(quarterExp::READ, "", "", varStr, m_curStmtLineNo));
 }
 
+/*
+write语句四元式
+(WRITE, , ,输出变量)
+*/
 void codegenerater::interpretWriteStmt(treeNode * node)
 {
 	string varStr = interpretExp(node->getLeft());
@@ -165,6 +198,10 @@ void codegenerater::interpretWriteStmt(treeNode * node)
 	m_qeVec.push_back(quarterExp(quarterExp::WRITE, "", "", varStr, m_curStmtLineNo));
 }
 
+/*
+声明变量语句四元式
+(INT/REAL/CHAR, 值, , 变量)
+*/
 void codegenerater::interpretDecalreStmt(treeNode * node)
 {
 	if (node->getLeft()->getType() == treeNode::FUNDECLARE) {
@@ -208,6 +245,10 @@ void codegenerater::interpretDecalreStmt(treeNode * node)
 
 }
 
+/*
+赋值语句四元式
+(ASSIGN,值, ,变量)
+*/
 void codegenerater::interpretAssignStmt(treeNode * node)
 {
 	int varType = m_table.checkSymbolIsDeclared(node->getLeft(), node->getLeft()->getLineNo());
@@ -225,6 +266,14 @@ void codegenerater::interpretAssignStmt(treeNode * node)
 	m_qeVec.push_back(quarterExp(quarterExp::ASSIGN, value, "", varStr, m_curStmtLineNo));
 }
 
+/*
+函数声明四元式
+(INT/REAL/VOID/CHAR, , ,函数名())
+(IN, , ,)
+(函数主体操作)
+(OUT, , ,)
+(JMP, , ,返回调用函数前的语句序号)
+*/
 void codegenerater::interpretFunction(treeNode * node)
 {
 	if (m_level > 0)
@@ -280,6 +329,11 @@ void codegenerater::interpretFunction(treeNode * node)
 	m_qeVec.push_back(quarterExp(quarterExp::JMP, "", "", "@ebp", m_curStmtLineNo));
 }
 
+/*
+return语句四元式
+(ASSIGN,返回值, ,函数返回所赋的变量)
+(JMP, ,返回调用函数时的四元式序号)
+*/
 void codegenerater::interpretReturnStmt(treeNode * node)
 {
 	if (m_level == 0)
@@ -296,6 +350,15 @@ void codegenerater::interpretReturnStmt(treeNode * node)
 	m_returnJmpIndexVec.push_back(quarterExp::index());
 }
 
+/*
+函数调用四元式
+(ASSIGN,0, ,栈顶)
+(ASSIGN,依次将参数赋值到栈顶)
+(ASSIGN,函数起始地址 , ,栈顶)
+(CALL, , ,函数名)
+(JMP, , ,函数所在四元式序号)
+(CALLFH, , ,)
+*/
 string codegenerater::interpretFunctionCall(treeNode * node)
 {
 	if (m_level == 0)
@@ -344,6 +407,9 @@ string codegenerater::interpretFunctionCall(treeNode * node)
 	return "@esp-1";
 }
 
+/*
+表达式语句
+*/
 string codegenerater::interpretExp(treeNode * node)
 {
 	if (node->getType() == treeNode::EXP || node->getType() == treeNode::ADDTIVE_EXP) {
@@ -388,6 +454,10 @@ string codegenerater::interpretExp(treeNode * node)
 	throw codegeneraterException(m_curStmtLineNo, "表达式不合法");
 }
 
+/*
+逻辑表达式四元式
+(符号,左值,右值,临时变量)
+*/
 string codegenerater::interpretLogicExp(treeNode * node)
 {
 	int leftType, rightType;
@@ -447,6 +517,10 @@ string codegenerater::interpretLogicExp(treeNode * node)
 	return temp;
 }
 
+/*
+多项式四元式
+(加减符号,左值,右值,临时变量)
+*/
 string codegenerater::interpretAddtiveExp(treeNode * node)
 {
 	int leftType, rightType;
@@ -510,6 +584,10 @@ string codegenerater::interpretAddtiveExp(treeNode * node)
 	return temp_1;
 }
 
+/*
+项四元式
+(乘除符号,左值,右值,临时变量)
+*/
 string codegenerater::interpretTermExp(treeNode * node)
 {
 	int leftType, rightType;
@@ -571,6 +649,9 @@ string codegenerater::interpretTermExp(treeNode * node)
 	return temp_1;
 }
 
+/*
+检查变量是否被声明过
+*/
 string codegenerater::interpretVar(treeNode * node)
 {
 	int result = m_table.checkSymbolIsDeclared(node, node->getLineNo());
@@ -581,15 +662,6 @@ string codegenerater::interpretVar(treeNode * node)
 	return varStr;
 }
 
-string codegenerater::interpretReference(treeNode * node)
-{
-	return string();
-}
-
-string codegenerater::interpretScript(treeNode * node)
-{
-	return string();
-}
 
 void codegenerater::checkDeclareIsRight(int declarType)
 {
@@ -693,7 +765,7 @@ bool codegenerater::isConstant(string & str, int & type)
 	type = value::INT_VALUE;
 	for (int i = 0; i < str.size(); i++) {
 		char ch = str[i];
-		if (isalpha(ch) || ch == '_' || ch == '@')
+		if (isalpha(ch) || ch == '_' || ch == '@')//为变量或栈顶底
 			return false;
 		if (ch == '.')
 			type = value::REAL_VALUE;
@@ -701,15 +773,6 @@ bool codegenerater::isConstant(string & str, int & type)
 	return true;
 }
 
-bool codegenerater::isSubscriptRight(string & script)
-{
-	return false;
-}
-
-bool codegenerater::isAssignRight(int varType, string & valueStr)
-{
-	return false;
-}
 
 int codegenerater::transformFunToValue(int funType)
 {

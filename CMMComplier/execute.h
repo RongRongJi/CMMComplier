@@ -21,16 +21,10 @@ public:
 	bool init(vector<quarterExp> qeVec);
 	void runSingleStmt();
 	void inputToStream(string value);
-	int runMode();
-	void setRunMode(int runMode);
 	
 	bool isOver();
 	void setIsOver(bool isOver);
 
-	int isRunFinished();
-	void setIsRunFinished(int isRunFinished);
-	int isExceptionHappened();
-	void setIsExceptionHappened(int isExceptionHappened);
 	void run();
 	
 private:
@@ -38,45 +32,38 @@ private:
 	static const int GLOBAL_ADDR = 0x30000000;  //全局区起始地址(3->4)
 	static const int CONST_ADDR = 0x20000000;   //常量区起始地址(2->3)
 	static const int CODE_ADDR = 0x10000000;    //代码段起始地址(1->2)
-	int m_nextQeVecIndex;
-	int m_ebp;
-	int m_esp;
-	stack<int> m_previousEbp;
-	stack<int> m_previousEsp;
-	int m_level;
-	bool m_waitInput;
-	vector<value> m_valueVec;
-	map<int, int> m_addrMap;
-	int m_curDataAddr;
-	symbolTable m_symbolTable;
-	vector<quarterExp> m_qeVec;
-	map<string, value> m_tempMap;
-	vector<value> m_constVec;
-	map<int, int> m_constMap;
-	int m_curConstAddr;
-	bool m_isOver;
-	vector<value> m_globalVec;
-	map<int, int> m_globalMap;
-	int m_curGlobalAddr;
-	int m_executeStmtLineNo;
+	int m_nextQeVecIndex;						//四元式行数
+	int m_ebp;									//栈底
+	int m_esp;									//栈顶
+	stack<int> m_previousEbp;					//前栈底
+	stack<int> m_previousEsp;					//前栈顶
+	int m_level;								//代码层数
+	vector<value> m_valueVec;					//所有数值
+	map<int, int> m_addrMap;					//地址
+	int m_curDataAddr;							//当前地址
+	symbolTable m_symbolTable;					//符号表
+	vector<quarterExp> m_qeVec;					//四元式表
+	map<string, value> m_tempMap;				//临时变量
+	vector<value> m_constVec;					//常量集
+	map<int, int> m_constMap;					//常量对
+	int m_curConstAddr;							//当前常量地址
+	bool m_isOver;								//是否结束
+	vector<value> m_globalVec;					//全局集
+	map<int, int> m_globalMap;					//全局对
+	int m_curGlobalAddr;						//当前全局地址
+	int m_executeStmtLineNo;					//正在执行的行数
 
-	stringstream m_inputStream;
+	stringstream m_inputStream;					//输入流
 
-	int m_isRunFinished;
-	int m_isExceptionHappened;
 
 private:
-	int getStringType(string str);
-	value readValue(string str);
-	void assignProcess(symbol sym, int index, int dereference, string str);
+	int getStringType(string str);	//获取四元式类型
+	value readValue(string str);	//根据字符串读值
+	void assignProcess(symbol sym, string str);		//赋值操作
+	//赋值辅助操作
 	void assignUtil(int valueIndex, int index, string valueStr, int valueType, bool isGlobal);
-	void declareProcess(quarterExp qExp, string type);
-	int getValueIndex(string addrValue, int &addrRange, int &offset);
-	int getScript(string varStr);
-	int getRegNum(string str);
-	string addrFromStr(string addr);
-	string addrFromInt(int addr);
-	void setAddrUnitSize(int symbolType);
-	void setAddrUnitSize(string addrStr);
+	void declareProcess(quarterExp qExp, string type);		//声明操作
+	int getValueIndex(string addrValue, int &addrRange, int &offset);	//根据地址锁定位置
+	int getRegNum(string str);		//获取栈顶或栈底的值
 };
 

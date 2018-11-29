@@ -1,2 +1,9 @@
-﻿  parser.cpp
+﻿  execute.cpp
+e:\软四相关\大三上学期\解释器\cmmcomplier\cmmcomplier\execute.cpp(323): warning C4804: “<”: 在操作中使用类型“bool”不安全
+e:\软四相关\大三上学期\解释器\cmmcomplier\cmmcomplier\execute.cpp(372): warning C4267: “参数”: 从“size_t”转换到“int”，可能丢失数据
+e:\软四相关\大三上学期\解释器\cmmcomplier\cmmcomplier\execute.cpp(376): warning C4267: “参数”: 从“size_t”转换到“int”，可能丢失数据
+e:\软四相关\大三上学期\解释器\cmmcomplier\cmmcomplier\execute.cpp(475): warning C4267: “初始化”: 从“size_t”转换到“int”，可能丢失数据
+  main.cpp
+  正在生成代码...
+e:\软四相关\大三上学期\解释器\cmmcomplier\cmmcomplier\execute.cpp(394): warning C4715: “execute::readValue”: 不是所有的控件路径都返回值
   CMMComplier.vcxproj -> E:\软四相关\大三上学期\解释器\CMMComplier\x64\Debug\CMMComplier.exe

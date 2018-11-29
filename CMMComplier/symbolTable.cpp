@@ -1,4 +1,5 @@
 #include "symbolTable.h"
+#include "codegeneraterException.h"
 #include<sstream>
 
 const string symbolTable::TEMP_PREFIX = "#T";
@@ -24,7 +25,8 @@ void symbolTable::registerSymbol(symbol  symbol)
 	for (int i = 0; i < m_symbolVec.size(); i++) {
 		if (m_symbolVec[i].name() == symbol.name() && m_symbolVec[i].level() == symbol.level()) {
 			stringstream ss;
-			ss << "'" << symbol.name() << "' previously declared here";
+			ss << "'" << symbol.name() << "' 已经被声明过";
+			throw codegeneraterException(symbol.lineNo(), ss.str());
 		}
 	}
 	m_symbolVec.push_back(symbol);
@@ -35,7 +37,8 @@ void symbolTable::registerFunSymbol(funsymbol  funSymbol)
 	for (int i = 0; i < m_funSymbolVec.size(); i++) {
 		if (m_funSymbolVec[i].name() == funSymbol.name()) {
 			stringstream ss;
-			ss << "'" << funSymbol.name() << "' previously declared here";
+			ss << "'" << funSymbol.name() << "'函数已经被声明过";
+			throw codegeneraterException(funSymbol.lineNo(), ss.str());
 		}
 	}
 	m_funSymbolVec.push_back(funSymbol);
@@ -69,7 +72,7 @@ string symbolTable::getNewTempSymbolName()
 	}
 }
 
-symbol symbolTable::getSymbol(string  name, int  index, int  dereference)
+symbol symbolTable::getSymbol(string  name)
 {
 	for (int i = m_symbolVec.size() - 1; i >= 0; i--) {
 		symbol tempSymbol = m_symbolVec[i];
@@ -83,9 +86,7 @@ symbol symbolTable::getSymbol(string  name, int  index, int  dereference)
 
 int symbolTable::getSymbolType(string  name)
 {
-	int index = -1;
-	int dereference = 0;
-	return getSymbol(name, index, dereference).type();
+	return getSymbol(name).type();
 }
 
 int symbolTable::getCurFunSymbolType()
@@ -100,6 +101,7 @@ funsymbol symbolTable::getFunSymbol(string  name, int lineNo)
 		if (funSymbol.name() == name)
 			return funSymbol;
 	}
+	throw codegeneraterException(lineNo, "该函数未声明");
 }
 
 int symbolTable::getLastSymbolType()
@@ -119,13 +121,13 @@ int symbolTable::checkSymbolIsDeclared(treeNode * node, int lineNo)
 		if (tempSymbol.name() == node->getValue()) {
 			if (tempSymbol.elementNum() == 0) {
 				if (node->getLeft() == NULL)
-					return 0;
+					return 0;  //普通变量
 			}
 			else if (tempSymbol.elementNum() < 0) {
 				if (node->getLeft() == NULL)
-					return -1;
+					return -1; 
 				else
-					return 0;
+					return 0;  //普通变量
 			}
 		}
 	}

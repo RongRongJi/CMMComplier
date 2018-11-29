@@ -31,9 +31,9 @@ public:
 	void setStmtIndex(int stmtIndex);
 
 private:
-	std::string m_name;
-	int m_lineNo;
-	int m_returnType;
-	int m_stmtIndex;
+	std::string m_name;		//符号名
+	int m_lineNo;			//行号
+	int m_returnType;		//返回类型
+	int m_stmtIndex;		//语句行数
 };
 
