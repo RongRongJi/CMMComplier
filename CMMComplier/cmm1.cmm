@@ -1,0 +1,12 @@
+void main(){
+	int i=3;
+	while(i>0){
+		write(i);
+		i=i-1;
+		write("\n");
+	}
+    for(i=0;i<3;i=i+1){
+		write(i);
+		write("\n");
+	}
+}

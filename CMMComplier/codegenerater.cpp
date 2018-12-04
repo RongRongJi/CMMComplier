@@ -14,7 +14,7 @@ codegenerater::~codegenerater()
 {
 }
 
-vector<quarterExp> codegenerater::generateCode(vector<treeNode*>& treeNodeVec, string & errStr)
+vector<quarterExp> codegenerater::generateCode(vector<treeNode*>& treeNodeVec, string & errStr, bool & isError)
 {
 	globalVarVec.clear();
 	quarterExp::setIndex(-1);
@@ -23,6 +23,7 @@ vector<quarterExp> codegenerater::generateCode(vector<treeNode*>& treeNodeVec, s
 	m_curFunLevel = 0;
 	m_table.clearVec();
 	m_qeVec.clear();
+	isError = false;
 	m_returnJmpIndexVec.clear();
 	while (!m_typeStack.empty())
 		m_typeStack.pop();
@@ -31,7 +32,8 @@ vector<quarterExp> codegenerater::generateCode(vector<treeNode*>& treeNodeVec, s
 			interpret(treeNodeVec[i]);
 		}
 		catch (codegeneraterException & cge) {
-			errStr += ("\n   " + cge.message());
+			isError = true;
+			errStr += (cge.message()+"\n");
 		}
 		
 	}

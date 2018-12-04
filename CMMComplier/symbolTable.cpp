@@ -131,6 +131,7 @@ int symbolTable::checkSymbolIsDeclared(treeNode * node, int lineNo)
 			}
 		}
 	}
+	throw codegeneraterException(lineNo, "'" + node->getValue() + "'Î´ÉùÃ÷");
 }
 
 vector<symbol> symbolTable::symbolVec()

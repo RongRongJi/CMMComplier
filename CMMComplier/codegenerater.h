@@ -15,7 +15,7 @@ class codegenerater
 public:
 	codegenerater();
 	~codegenerater();
-	vector<quarterExp> generateCode(vector<treeNode *>& treeNodeVec, string & errStr);
+	vector<quarterExp> generateCode(vector<treeNode *>& treeNodeVec, string & errStr, bool & isError);
 	static int programEntry;
 	int getEntry();
 

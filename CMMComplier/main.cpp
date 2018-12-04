@@ -14,7 +14,7 @@ using namespace std;
 int main() {
 	lexer* lex = new lexer();
 	parser* parse = new parser();
-	ifstream myfile("hello.cmm");
+	ifstream myfile("cmm4.cmm");
 	//ofstream outfile("hello.par");
 	string temp, total = "";
 	if (!myfile.is_open()) {
@@ -25,21 +25,28 @@ int main() {
 	}
 	vector<token> tokenVec = lex->LexAnalyze(total);
 	string errorStr;
-	bool isParseSucceed;
-	vector<treeNode*> treeNodeVec = parse->SyntacticAnalyse(tokenVec,isParseSucceed);
-	for (int i = 0; i < treeNodeVec.size(); i++) {
+	bool isParseError;
+	vector<treeNode*> treeNodeVec = parse->SyntacticAnalyse(tokenVec,isParseError);
+	if (!isParseError) {
+		/*for (int i = 0; i < treeNodeVec.size(); i++) {
 		treeNode::travelTree(treeNodeVec[i], 0);
+		}*/
+		codegenerater* cg = new codegenerater();
+		bool isGeneraterError;
+		vector<quarterExp> midCode = cg->generateCode(treeNodeVec, errorStr, isGeneraterError);
+		if (!isGeneraterError) {
+			/*for (int i = 0; i < midCode.size(); i++) {
+			cout << midCode[i].toString() << endl;
+			}*/
+			execute* exe = new execute();
+			cout << "运行结果为:" << endl;
+			exe->init(midCode);
+			exe->run();
+		}
+		else {
+			cout << errorStr;
+		}
 	}
-	codegenerater* cg = new codegenerater();
-	vector<quarterExp> midCode = cg->generateCode(treeNodeVec, errorStr);
-	for (int i = 0; i < midCode.size(); i++) {
-		cout << midCode[i].toString() << endl;
-	}
-	execute* exe = new execute();
-	cout << "运行结果为:" << endl;
-	exe->init(midCode);
-	exe->run();
-	cout << endl;
 	system("pause");
 	return 0;
 }
