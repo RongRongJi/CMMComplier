@@ -497,7 +497,7 @@ void execute::declareProcess(quarterExp qExp, string type)
 int execute::getValueIndex(string addrValue, int &addrRange, int &offset)
 {
 	int addr = atoi(addrValue.substr(1, addrValue.size() - 1).c_str());
-	if (addr <= DATA_ADDR && addr > 0x40000000) {
+	if (addr <= DATA_ADDR && addr > 0x40000000) {//数据段
 		addrRange = 1;
 		for (int i = 0; i < m_valueVec.size(); i++) {
 			if (addr >= m_addrMap[i]) {
@@ -513,7 +513,7 @@ int execute::getValueIndex(string addrValue, int &addrRange, int &offset)
 		}
 		throw executeException(m_executeStmtLineNo, "堆溢出");
 	}
-	else if (addr >= GLOBAL_ADDR && addr < 0x40000000) {
+	else if (addr >= GLOBAL_ADDR && addr < 0x40000000) {//全局
 		addrRange = 2;
 		for (int i = 0; i < m_globalVec.size(); i++) {
 			if (addr <= m_globalMap[i]) {
@@ -528,7 +528,7 @@ int execute::getValueIndex(string addrValue, int &addrRange, int &offset)
 		}
 		throw executeException(m_executeStmtLineNo, "堆溢出");
 	}
-	else if (addr >= CONST_ADDR && addr < GLOBAL_ADDR) {
+	else if (addr >= CONST_ADDR && addr < GLOBAL_ADDR) {//常量
 		addrRange = 3;
 		for (int i = 0; i < m_constVec.size(); i++) {
 			if (addr <= m_constMap[i]) {
@@ -543,7 +543,7 @@ int execute::getValueIndex(string addrValue, int &addrRange, int &offset)
 		}
 		throw executeException(m_executeStmtLineNo, "栈溢出");
 	}
-	else if (addr >= CODE_ADDR && addr < CONST_ADDR) {
+	else if (addr >= CODE_ADDR && addr < CONST_ADDR) {//代码区
 		addrRange = 4;
 		return (addr - CODE_ADDR) / 4;
 	}

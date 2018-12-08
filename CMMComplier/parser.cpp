@@ -11,6 +11,7 @@ vector<treeNode*> parser::SyntacticAnalyse(vector<token> tokenVec, bool & isErro
 	m_tokenVec = tokenVec;
 	m_treeNodeVec.clear();
 	m_errorNode = NULL;
+	isError = false;
 	try {
 		while (index < m_tokenVec.size()) {
 			treeNode* node = parseStmt();
@@ -26,7 +27,7 @@ vector<treeNode*> parser::SyntacticAnalyse(vector<token> tokenVec, bool & isErro
 		if (m_errorNode != NULL)
 			delete m_errorNode;
 	}
-	isError = false;
+	
 	return m_treeNodeVec;
 }
 

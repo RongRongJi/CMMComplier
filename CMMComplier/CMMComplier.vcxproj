@@ -152,6 +152,11 @@
     <ClCompile Include="treeNode.cpp" />
     <ClCompile Include="value.cpp" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="cmm1.cmm" />
+    <None Include="cmm2.cmm" />
+    <None Include="cmm3.cmm" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>

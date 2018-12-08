@@ -45,7 +45,7 @@ private:
 	vector<quarterExp> m_qeVec;					//四元式表
 	map<string, value> m_tempMap;				//临时变量
 	vector<value> m_constVec;					//常量集
-	map<int, int> m_constMap;					//常量对
+	map<int, int> m_constMap;					//常量map
 	int m_curConstAddr;							//当前常量地址
 	bool m_isOver;								//是否结束
 	vector<value> m_globalVec;					//全局集

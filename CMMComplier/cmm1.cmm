@@ -1,12 +1,22 @@
+int max(int a,int b){
+	if(a>b)
+		return a;
+	else if(a<=b)
+		return b;
+}
 void main(){
-	int i=3;
-	while(i>0){
-		write(i);
-		i=i-1;
-		write("\n");
+	int a;
+	int b;
+	read(a);
+	read(b);
+	int result = max(a,b);
+	write(result);
+	write("\n");
+	for(result=3;result>0;result=result-1){
+		write("forstate ");
 	}
-    for(i=0;i<3;i=i+1){
-		write(i);
-		write("\n");
+	while(result<=3){
+		write("while ");
+		result=result+1;
 	}
 }

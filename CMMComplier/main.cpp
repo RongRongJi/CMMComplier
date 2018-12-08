@@ -14,36 +14,43 @@ using namespace std;
 int main() {
 	lexer* lex = new lexer();
 	parser* parse = new parser();
-	ifstream myfile("cmm4.cmm");
-	//ofstream outfile("hello.par");
+	ifstream myfile("cmm3.cmm");
 	string temp, total = "";
 	if (!myfile.is_open()) {
 		cout << "未成功打开文件" << endl;
 	}
 	while (getline(myfile, temp)) {
-		total += temp + "\n";
+		total += temp +"\n";
 	}
 	vector<token> tokenVec = lex->LexAnalyze(total);
+	cout << "词法分析:" << endl;
+	for (int i = 0; i < tokenVec.size(); i++) {
+		cout << " 行号: " << tokenVec[i].toString() << endl;
+	}
 	string errorStr;
 	bool isParseError;
 	vector<treeNode*> treeNodeVec = parse->SyntacticAnalyse(tokenVec,isParseError);
 	if (!isParseError) {
-		/*for (int i = 0; i < treeNodeVec.size(); i++) {
-		treeNode::travelTree(treeNodeVec[i], 0);
-		}*/
+		cout << "语法分析:" << endl;
+		for (int i = 0; i < treeNodeVec.size(); i++) {
+			treeNode::travelTree(treeNodeVec[i], 0);
+		}
 		codegenerater* cg = new codegenerater();
 		bool isGeneraterError;
 		vector<quarterExp> midCode = cg->generateCode(treeNodeVec, errorStr, isGeneraterError);
 		if (!isGeneraterError) {
-			/*for (int i = 0; i < midCode.size(); i++) {
+			cout << "语义分析:" << endl;
+			for (int i = 0; i < midCode.size(); i++) {
 			cout << midCode[i].toString() << endl;
-			}*/
+			}
 			execute* exe = new execute();
 			cout << "运行结果为:" << endl;
-			exe->init(midCode);
-			exe->run();
+			bool isExecute = exe->init(midCode);
+			if(isExecute)
+				exe->run();
 		}
 		else {
+			cout << "语义分析失败！" << endl;
 			cout << errorStr;
 		}
 	}

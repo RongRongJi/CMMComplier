@@ -1,12 +1,9 @@
-int max(int a,int b){
-	if(a>b)
-		return a;
-	else if(a<=b)
-		return b;
+int printInt(int a){
+	return a;
 }
 void main(){
-	int a = 2;
-	int b = 3;
-	int result = max(a,b);
-	write(result);
+	int i=3;
+	int j;
+	read(j)
+	write(printInt(j));
 }
